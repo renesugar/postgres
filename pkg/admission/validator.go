@@ -134,7 +134,7 @@ func ValidatePostgres(client kubernetes.Interface, extClient kubedbv1alpha1.Kube
 	}
 
 	if postgres.Spec.Replicas == nil || *postgres.Spec.Replicas < 1 {
-		return fmt.Errorf(`spec.replicas "%v" invalid. Value must be one`, postgres.Spec.Replicas)
+		return fmt.Errorf(`spec.replicas "%v" invalid. Value must be greater than zero`, postgres.Spec.Replicas)
 	}
 
 	if postgres.Spec.Storage != nil {
@@ -183,6 +183,13 @@ func ValidatePostgres(client kubernetes.Interface, extClient kubedbv1alpha1.Kube
 		if _, err := client.CoreV1().Secrets(postgres.Namespace).Get(databaseSecret.SecretName, metav1.GetOptions{}); err != nil {
 			return err
 		}
+	}
+
+	if postgres.Spec.Init != nil &&
+		postgres.Spec.Init.SnapshotSource != nil &&
+		databaseSecret == nil {
+		return fmt.Errorf("in Snapshot init, 'spec.databaseSecret.secretName' of %v needs to be similar to older database of snapshot %v",
+			postgres.Name, postgres.Spec.Init.SnapshotSource.Name)
 	}
 
 	if postgres.Spec.Init != nil && postgres.Spec.Init.PostgresWAL != nil {
