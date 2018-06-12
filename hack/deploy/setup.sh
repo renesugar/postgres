@@ -36,6 +36,7 @@ if [ "$APPSCODE_ENV" = "dev" ]; then
 fi
 
 echo ""
+echo "$CUSTOM_OPERATOR_TAG"
 echo "${KUBEDB_SCRIPT}hack/deploy/kubedb.sh | bash -s -- --operator-name=pg-operator "$@""
 ${KUBEDB_SCRIPT}hack/deploy/kubedb.sh | bash -s -- --operator-name=pg-operator "$@"
 
